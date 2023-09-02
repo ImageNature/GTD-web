@@ -7,18 +7,13 @@
         .container {
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             height: 100vh;
         }
 
         form {
             margin-top: 30px;
-        }
-
-        input[type="text"] {
-            width: 500px;
-            padding: 0 10px;
         }
 
         ul,
@@ -28,7 +23,7 @@
 
         ul {
             padding: 0;
-            width: 560px;
+            width: 600px;
         }
 
         ul li h2 {
@@ -40,6 +35,15 @@
 
 <body class="container">
     <h1>Task List</h1>
+    <style>
+        form {
+            width: 300px;
+            /* 设置您所需的宽度 */
+            padding: 0 1cm;
+            /* 增加左右间隔 */
+        }
+    </style>
+
     <form method="POST" action="/add">
         <input name="content" type="text" required>
         <input type="submit" value="Add Task">
