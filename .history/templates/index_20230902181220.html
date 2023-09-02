@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Task List</title>
+    <style>
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flex-box {
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 class="container">Task List</h1>
+
+    <div class="container">
+        <form class="flex-box" method="POST" action="/add">
+            <input name="content" type="text" required>
+            <input type="submit" value="Add Task">
+        </form>
+    </div>
+
+    <ul>
+        {% for day, tasklist in tasks.items() %}
+        <li>
+            <h2>{{ day }}</h2>
+            <ol>
+                {% for task in tasklist %}
+                <li>{{ task }}</li>
+                {% endfor %}
+            </ol>
+        </li>
+        {% endfor %}
+    </ul>
+
+</body>
+
+</html>

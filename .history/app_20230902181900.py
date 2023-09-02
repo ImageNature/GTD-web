@@ -24,7 +24,7 @@ def add():
   task_content = request.form.get('content')
   now = datetime.now()
   date_string = now.strftime("%Y-%m-%d")
-  datetime_string = now.strftime("%H:%M")
+  datetime_string = now.strftime("%Y-%m-%d-%H-%M")
   with open(os.path.join(directory, f"{date_string}.txt"), 'a') as f:
     f.write(f'{datetime_string} {task_content}\n')
   return redirect('/')

@@ -12,10 +12,11 @@ os.makedirs(directory, exist_ok=True)
 def index():
   tasks = defaultdict(list)
   for filename in os.listdir(directory):
+    date = filename.replace('.txt', '')
     with open(os.path.join(directory, filename), 'r') as f:
       lines = f.readlines()
       for line in lines:
-        tasks[filename.replace('.txt', '')].append(line.strip())
+        tasks[date].append(line.strip())
   return render_template('index.html', tasks=tasks)
 
 
@@ -23,10 +24,10 @@ def index():
 def add():
   task_content = request.form.get('content')
   now = datetime.now()
-  date_string = now.strftime("%Y-%m-%d")
-  datetime_string = now.strftime("%H:%M")
-  with open(os.path.join(directory, f"{date_string}.txt"), 'a') as f:
-    f.write(f'{datetime_string} {task_content}\n')
+  file_string = now.strftime("%Y-%m-%d")
+  task_string = now.strftime("%Y-%m-%d-%H-%M") + ' ' + task_content
+  with open(os.path.join(directory, f"{file_string}.txt"), 'a') as f:
+    f.write(f'{task_string}\n')
   return redirect('/')
 
 
