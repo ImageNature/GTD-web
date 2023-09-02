@@ -3,6 +3,20 @@ from datetime import datetime
 from collections import defaultdict
 from itertools import islice
 import os
+import csv
+from chardet.universaldetector import UniversalDetector
+
+
+def detect_encoding(file_path):
+  detector = UniversalDetector()
+  with open(file_path, 'rb') as f:
+    for line in f:
+      detector.feed(line)
+      if detector.done:
+        break
+  detector.close()
+  return detector.result['encoding']
+
 
 app = Flask(__name__)
 directory = 'task'
@@ -14,10 +28,12 @@ def index():
   page = request.args.get('page', default=1, type=int)
   tasks = defaultdict(list)
   for filename in os.listdir(directory):
-    with open(os.path.join(directory, filename), 'r') as f:
-      lines = f.readlines()
-      for line in lines:
-        tasks[filename.replace('.txt', '')].append(line.strip())
+    file_path = os.path.join(directory, filename)
+    encoding = detect_encoding(file_path)
+    with open(file_path, 'r', encoding=encoding) as f:
+      reader = csv.reader(f)
+      for row in reader:
+        tasks[filename.replace('.csv', '')].append(row[0])
   task_items = list(tasks.items())
   start = (page - 1) * 50
   end = start + 50
@@ -33,8 +49,11 @@ def add():
   now = datetime.now()
   date_string = now.strftime("%Y-%m-%d")
   datetime_string = now.strftime("%Y-%m-%d-%H-%M")
-  with open(os.path.join(directory, f"{date_string}.txt"), 'a') as f:
-    f.write(f'{datetime_string} {task_content}\n')
+  filename = os.path.join(directory, f"{date_string}.csv")
+  mode = 'a' if os.path.exists(filename) else 'w'
+  with open(filename, mode, encoding='utf-8', newline='') as f:
+    writer = csv.writer(f)
+    writer.writerow([f'{datetime_string} {task_content}'])
   return redirect('/')
 
 
