@@ -48,13 +48,19 @@ def add():
   task_content = request.form.get('content')
   now = datetime.now()
   date_string = now.strftime("%Y-%m-%d")
-  datetime_string = now.strftime("%Y-%m-%d-%H-%M")
+  datetime_string = now.strftime("%H:%M")
   filename = os.path.join(directory, f"{date_string}.csv")
   mode = 'a' if os.path.exists(filename) else 'w'
   with open(filename, mode, encoding='utf-8', newline='') as f:
     writer = csv.writer(f)
     writer.writerow([f'{datetime_string} {task_content}'])
   return redirect('/')
+
+
+@app.route('/history', methods=['GET'])
+def history():
+  # 这里填入你处理历史任务信息的逻辑
+  return render_template('history.html')  # 如果你有另一个处理历史任务的模板
 
 
 if __name__ == '__main__':

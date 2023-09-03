@@ -4,11 +4,11 @@
 <head>
     <title>Task List</title>
     <style>
-        .task-input {
+        .menu {
             position: fixed;
             top: 0;
-            left: 0;
             width: 100%;
+            height: 25px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -16,10 +16,40 @@
             padding: 20px 0;
         }
 
+        .task-input {
+            display: flex;
+            height: 25px;
+            justify-content: center;
+            align-items: center;
+            margin-right: 20px;
+            /*新加的边距*/
+        }
+
+        .buttons {
+            display: flex;
+            align-items: center;
+        }
+
+        .buttons a {
+            height: 20px;
+            padding: 2px 5px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+
         input[type="text"] {
             width: 500px;
+            height: 25px;
             padding: 0 10px;
         }
+
+        .task-input input[type='submit'] {
+            height: 25px;
+        }
+
 
         .container {
             margin-top: 100px;
@@ -47,11 +77,17 @@
 </head>
 
 <body>
-    <div class="task-input">
-        <form method="POST" action="/add">
-            <input name="content" type="text" required>
-            <input type="submit" value="Add Task">
-        </form>
+    <div class="menu">
+        <div class="task-input">
+            <form method="POST" action="/add">
+                <input name="content" type="text" required>
+                <input type="submit" value="Add Task">
+            </form>
+        </div>
+        <div class="buttons">
+            <a class="history-btn" href="/history">History</a>
+            <a class="stats-btn" href="/stats">Stats</a>
+        </div>
     </div>
 
     <div class="container">
@@ -67,12 +103,6 @@
             </li>
             {% endfor %}
         </ul>
-        {% if page > 1 %}
-        <a href="/?page={{ page - 1 }}">上一页</a>
-        {% endif %}
-        {% if not last_page %}
-        <a href="/?page={{ page + 1 }}">下一页</a>
-        {% endif %}
     </div>
 </body>
 
