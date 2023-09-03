@@ -59,8 +59,8 @@ def add():
 
 @app.route('/history', methods=['GET'])
 def history():
-  # 这里填入你处理历史任务信息的逻辑
-  return render_template('history.html')  # 如果你有另一个处理历史任务的模板
+  # 历史任务信息的逻辑
+  return render_template('history.html')  # 另一个处理历史任务的模板，位于 template 文件夹下
 
 
 if __name__ == '__main__':
