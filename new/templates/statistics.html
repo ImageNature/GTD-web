@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Statistics</title>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/cal-heatmap@3.6.2/cal-heatmap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/cal-heatmap@3.6.2/cal-heatmap.css" />
+
+    <style>
+        .breadcrumb {
+            position: fixed;
+            top: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 10px;
+            background-color: #f8f8f8;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, .1);
+            z-index: 10;
+        }
+
+        body {
+            margin-top: 60px;
+            align-items: center;
+        }
+
+        #subpage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #subpage>div {
+            margin-bottom: 50px;
+            /* 增加两个图之间的间距 */
+        }
+
+        h2 {
+            text-align: center;
+            /* 让标题居中 */
+        }
+    </style>
+</head>
+
+<body>
+    <header class="breadcrumb">
+        <form method="POST">
+            <a href="/">HOME</a>
+        </form>
+    </header>
+
+    <section id="subpage">
+        <h2>Task Heatmap</h2>
+        <div id="cal-heatmap"></div>
+        <div id="cal-heatmap2"></div>
+    </section>
+
+
+    <script>
+        fetch('/get_task_hours_data')
+            .then(response => response.json())
+            .then(data => {
+                let heatmapData = {};
+                data.forEach(item => {
+                    for (let h = 0; h < 24; h++) {
+                        let timestamp = moment(item.date + " " + (h < 10 ? "0" + h + ":00" : h + ":00"), "YYYY-MM-DD HH:mm").unix();
+                        heatmapData[timestamp] = item.count;
+                    }
+                });
+
+                var cal = new CalHeatMap();
+                cal.init({
+                    start: moment().subtract(6, "days").toDate(),
+                    domain: "day",
+                    subDomain: "hour",
+                    data: heatmapData,
+                    cellSize: 20,
+                    cellPadding: 2,
+                    range: 7,
+                    domainGutter: 3,
+                    tooltip: true,
+                    id: "cal-heatmap2"
+                });
+            });
+    </script>
+
+    <script>
+        fetch('/get_task_days_data')
+            .then(response => response.json())
+            .then(data => {
+                let heatmapData = {};
+                data.forEach(item => {
+                    let timestamp = moment(item.date, "YYYY-MM-DD").unix();
+                    heatmapData[timestamp] = item.count;
+                });
+
+                var cal = new CalHeatMap();
+                cal.init({
+                    start: moment().subtract(0, "year").toDate(), // 显示最近一年的数据
+                    domain: "year",   // 每个单元表示一年
+                    subDomain: "day", // 每个子单元表示一天
+                    data: heatmapData,
+                    cellSize: 20,     // 增加格子大小
+                    cellPadding: 5,   // 增加格子间距
+                    range: 1,         // 显示一年的数据
+                    domainGutter: 10, // 在各个“年份”之间增加更多的间距
+                    domainLabelFormat: function (date) { // 设置主域年标签的格式
+                        return moment(date).year();
+                    },
+                    rowLimit: 7, // 每列包含 7 天，即一周
+                    tooltip: true,
+                    id: "cal-heatmap",
+                    afterLoadData: function (timestamp) {
+                        return timestamp;
+                    },
+                    // 更新提示框的信息，显示日期和完成任务数
+                    tooltip: function (date, n) {
+                        return '<span>' + moment.unix(date).format('YYYY-MM-DD') + ' : ' + (n ? ' Task completed - ' + n : ' No task completed') + '</span>';
+                    }
+                });
+            });
+    </script>
+
+
+    <div style="margin: auto; width: 80%; /* 根据需要调整宽度 */">
+        <img id="heatmapImg" src="/static/heatmap.svg" width=100% height="500" />
+    </div>
+
+</body>
+
+</html>

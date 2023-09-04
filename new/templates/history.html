@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf8">
+    <title>History</title>
+
+    <!-- CSS样式 -->
+    <style>
+        /* 面包屑导航 */
+        .breadcrumb {
+            position: fixed;
+            top: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 10px;
+            background-color: #f8f8f8;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, .1);
+            z-index: 10;
+        }
+
+        /* 页面主体上边距 */
+        body {
+            margin-top: 50px;
+        }
+
+        /* 表单布局 */
+        form {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 任务内容 */
+        #task_contents {
+            margin-bottom: 0px;
+            width: 50vw;
+            padding: 5px;
+            padding-left: 10px;
+            box-sizing: border-box;
+            /* 确保填充不超出宽度 */
+        }
+
+        /* 任务列表表格居中 */
+        #taskList table {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* 文件名颜色为绿色 */
+        #fileList li {
+            color: green;
+            margin-left: auto;
+            margin-right: auto;
+            font-family: sans-serif;
+            padding-left: 20px;
+            font-weight: bold;
+            font-size: 25px;
+        }
+    </style>
+
+    <!-- 加载jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- 你的JavaScript代码 -->
+    <script>
+        /* 获取文件列表 */
+        function getFileList() {
+            var url = 'http://localhost:5000/getTaskFiles';
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    console.log('服务器响应：', response);
+                    var files = Array.isArray(response) ? response : [];
+
+                    if (files.length > 0) {
+                        var ul = $('<ul></ul>').append(
+                            files.map(file => {
+                                let cleanFile = file.replace('.json', '');  // 移除 ".json"
+                                let li = $('<li></li>').text(cleanFile);
+                                getTasksForFile(file);
+                                return li;
+                            })
+                        );
+
+                        $('#fileList').empty().append(ul);
+                    } else {
+                        $('#fileList').empty().text('没有找到文件');
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('获取文件列表失败：', textStatus, ', 错误信息：', errorThrown);
+                }
+            });
+        }
+
+        /* 获取所有任务 */
+        function getAllTasks() {
+            let url = 'http://localhost:5000/doneTasks';
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    displayTasks(response);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('获取任务列表失败：', textStatus, ', 错误信息：', errorThrown);
+                }
+            });
+        }
+
+        /* 获取特定文件的任务 */
+        function getTasksForFile(filename) {
+            let url = 'http://localhost:5000/doneTasks/' + filename;
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    displayTasks(response);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('获取任务列表失败：', textStatus, ', 错误信息：', errorThrown);
+                }
+            });
+        }
+
+        /* 展示任务列表 */
+        function displayTasks(response) {
+            let tasks = Array.isArray(response) ? response : [];
+
+            if (tasks.length > 0) {
+
+                // 翻转任务列表，使其以时间倒序排列
+                tasks.reverse();
+
+                let rows = tasks.map(task => {
+                    let button = task.task_state === 'open' ?
+                        `<button onClick="closeTask(${task.task_id})">关闭</button>` : '';
+                    return `<tr>
+                            <td style="color: green; font-size: small; font-family: sans-serif; padding-right: 20px;font-weight: bold;">${task.task_time}</td>
+                            <td style="font-family: sans-serif; padding-right: 10px;">${task.task_contents}</td>
+                            <td style="color: green;font-family: sans-serif; padding-right: 10px; font-weight: bold;">${task.task_state} ${button}</td>
+                            </tr>`;
+                });
+
+                $('#taskList').empty().append('<table>' + rows.join("") + '</table>');
+            } else {
+                $('#taskList').empty().text('没有找到任务');
+            }
+        }
+
+
+        /* 文档加载完成后的操作 */
+        $(document).ready(function () {
+            // 页面加载时获取文件列表
+            getFileList();
+
+            // 点击事件来获取所有任务
+            $('#getAllTasks').on('click', function (e) {
+                e.preventDefault();
+                getAllTasks();
+            });
+
+            $('#history').on('click', function () {
+                window.location.href = 'http://localhost:5000/history';
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <!-- 导航 -->
+    <header class="breadcrumb">
+        <!-- 面包屑导航条 -->
+        <form method="POST">
+            <a href="/">HOME</a>
+        </form>
+    </header>
+
+    <!-- 任务按钮 -->
+    <button id="getAllTasks">获取全部任务</button>
+
+    <!-- 页面内容 -->
+    <section id="subpage">
+        <!-- 文件列表显示区域 -->
+        <div id="fileList"></div>
+
+        <!-- 任务列表显示区域 -->
+        <div id="taskList"></div>
+    </section>
+
+</body>
+
+</html>
